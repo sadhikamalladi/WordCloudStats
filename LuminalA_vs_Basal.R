@@ -33,34 +33,47 @@ basal <- read.csv('Data/C2_Inflammation_Basal_DistUp.txt',sep='\n')
 basal <- as.character(basal[,1])
 basal <- basal[!basal %in% C2_stopwords]
 
-# Make a table with frequencies of all terms in each of the 3 data sets --------
-terms <- background
+# Frequency table
+luma.freq <- unlist(table(luma))/length(luma)
+basal.freq <- unlist(table(basal))/length(basal)
+bg.freq <- unlist(table(background))/length(background)
 
-bg.freq <- as.matrix(table(background),nrow=1)
-bg.freq <- bg.freq/length(background)
+freq <- matrix(NA,nrow=length(bg.freq),ncol=3)
+freq[,1] <- bg.freq
+rownames(freq) <- names(bg.freq)
+freq[names(luma.freq),2] <- luma.freq
+freq[names(basal.freq),3] <- basal.freq
+colnames(freq) <- c('Background','Luminal A','Basal')
 
-luma.freq <- as.matrix(table(luma),nrow=1)
-luma.freq <- luma.freq/length(luma)
+# Counts table
+luma.ct <- unlist(table(luma))
+basal.ct <- unlist(table(basal))
+bg.ct <- unlist(table(background))
 
-basal.freq <- as.matrix(table(basal),nrow=1)
-basal.freq <- basal.freq/length(basal)
+count <- matrix(NA,nrow=length(bg.ct),ncol=3)
+count[,1] <- bg.ct
+rownames(count) <- names(bg.ct)
+count[names(luma.ct),2] <- luma.ct
+count[names(basal.ct),3] <- basal.ct
+colnames(count) <- c('Background','Luminal A','Basal')
 
-common <- intersect(rownames(luma.freq),rownames(basal.freq))
-bg.freq <- bg.freq[common,]
-luma.freq <- luma.freq[common,]
-basal.freq <- basal.freq[common,]
+# prop test
+pvals <- rep(1,nrow(count))
+names(pvals) <- rownames(count)
+for (term in rownames(count)) {
+  luma.yes <- count[term,2]
+  basal.yes <- count[term,3]
+  luma.no <- length(luma) - luma.yes
+  basal.no <- length(basal) - basal.yes
+  
+  mat <- matrix(NA, nrow=2, ncol=2)
+  mat[1,1] <- luma.yes
+  mat[1,2] <- luma.no
+  mat[2,1] <- basal.yes
+  mat[2,2] <- basal.no
+  
+  p <- prop.test(mat)$p.value
+  pvals[term] <- p
+}
 
-freq <- cbind(bg.freq,luma.freq,basal.freq)
-
-# Direct Comparison between LumA and Basal --------------------------------
-basal.tab <- table(basal)
-basal.tab <- basal.tab[common]
-luma.tab <- table(luma)
-luma.tab <- luma.tab[common]
-luma.vs.basal <- cbind(table(luma),table(basal))
-colnames(luma.vs.basal) <- c('Luminal A','Basal')
-
-pvals <- prop.test(luma.vs.basal)
-
-# Adjustment for Background -----------------------------------------------
 
