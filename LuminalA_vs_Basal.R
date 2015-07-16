@@ -57,12 +57,14 @@ count[names(luma.ct),2] <- luma.ct
 count[names(basal.ct),3] <- basal.ct
 colnames(count) <- c('Background','Luminal A','Basal')
 
-# prop test
-pvals <- rep(1,nrow(count))
-names(pvals) <- rownames(count)
-for (term in rownames(count)) {
-  luma.yes <- count[term,2]
-  basal.yes <- count[term,3]
+# prop test -- add in checks to ensure terms are common
+common <- intersect(names(luma.ct),names(basal.ct))
+common.ct <- count[common,1:2]
+pvals <- rep(1,nrow(common.ct))
+names(pvals) <- rownames(common.ct)
+for (term in rownames(common.ct)) {
+  luma.yes <- common.ct[term,2]
+  basal.yes <- common.ct[term,3]
   luma.no <- length(luma) - luma.yes
   basal.no <- length(basal) - basal.yes
   
