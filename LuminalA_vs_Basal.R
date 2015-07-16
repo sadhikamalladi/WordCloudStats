@@ -63,8 +63,8 @@ common.ct <- count[common,1:2]
 pvals <- rep(1,nrow(common.ct))
 names(pvals) <- rownames(common.ct)
 for (term in rownames(common.ct)) {
-  luma.yes <- common.ct[term,2]
-  basal.yes <- common.ct[term,3]
+  luma.yes <- common.ct[term,1]
+  basal.yes <- common.ct[term,2]
   luma.no <- length(luma) - luma.yes
   basal.no <- length(basal) - basal.yes
   
@@ -78,4 +78,4 @@ for (term in rownames(common.ct)) {
   pvals[term] <- p
 }
 
-
+write.csv(as.matrix(pvals),'PValues_LuminalA_vs_Basal.csv',sep=',')
